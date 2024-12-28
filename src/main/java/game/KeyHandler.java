@@ -5,8 +5,9 @@ import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
     public boolean upPressed, downPressed, leftPressed, rightPressed;
+    public boolean shootPressed;
 
-    GamePanel gp;
+    private GamePanel gp;
 
     public KeyHandler(GamePanel gp) {
         this.gp = gp;
@@ -33,6 +34,10 @@ public class KeyHandler implements KeyListener {
         }
 
 
+        if (code == KeyEvent.VK_SPACE) {
+            shootPressed = true;
+        }
+
     }
 
     @Override
@@ -53,6 +58,8 @@ public class KeyHandler implements KeyListener {
             rightPressed = false;
         }
 
-
+        if (code == KeyEvent.VK_SPACE) {
+            shootPressed = false;
+        }
     }
 }
