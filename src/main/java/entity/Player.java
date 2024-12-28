@@ -133,4 +133,44 @@ public class Player extends Entity {
                 break;
         }
     }
+
+    public GamePanel getGp() {
+        return gp;
+    }
+
+    public void setGp(GamePanel gp) {
+        this.gp = gp;
+    }
+
+    public KeyHandler getKh() {
+        return kh;
+    }
+
+    public void setKh(KeyHandler kh) {
+        this.kh = kh;
+    }
+
+    public List<Bullet> getBullets() {
+        return bullets;
+    }
+
+    public void setBullets(List<Bullet> bullets) {
+        this.bullets = bullets;
+    }
+
+    public long getReloadTime() {
+        return reloadTime;
+    }
+
+    public void setReloadTime(long reloadTime) {
+        this.reloadTime = reloadTime;
+    }
+
+    public long getLastShotTime() {
+        return lastShotTime;
+    }
+
+    public void setLastShotTime(long lastShotTime) {
+        this.lastShotTime = lastShotTime;
+    }
 }
