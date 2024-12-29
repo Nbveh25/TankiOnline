@@ -22,11 +22,11 @@ public class GamePanel extends JPanel implements Runnable {
     // FPS
     private final int FPS = 60;
 
-    private Player player;
-    private KeyHandler keyHandler;
     private Thread gameThread;
+    private Player player;
     private PlayerManager playerManager;
     private ClientManager clientManager;
+    private KeyHandler kh;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -34,12 +34,12 @@ public class GamePanel extends JPanel implements Runnable {
         setDoubleBuffered(true);
         this.setFocusable(true);
 
-        keyHandler = new KeyHandler(this);
+        kh = new KeyHandler(this);
 
-        this.addKeyListener(keyHandler);
+        this.addKeyListener(kh);
 
-        player = new Player(this, keyHandler);
-        playerManager = new PlayerManager(this, keyHandler);
+        player = new Player(this, kh);
+        playerManager = new PlayerManager(this, kh);
 
         try {
             clientManager = new ClientManager("localhost", 12345, this::handleGameData);
@@ -81,7 +81,7 @@ public class GamePanel extends JPanel implements Runnable {
         player.update();
         // Отправляем данные о нашем игроке
         if (clientManager != null && clientManager.getPlayerId() != -1) {
-            clientManager.sendPlayerData(clientManager.getPlayerId(), player.getX(), player.getY(), player.getDirection());
+            clientManager.sendPlayerData(clientManager.getPlayerId(), player.getX(), player.getY(), player.getDirection(), player.getSpriteNum());
         }
     }
 

@@ -28,7 +28,7 @@ public class GameClient {
         networkHelper = new NetworkHelper(socket);
 
         // Запрашиваем ID у сервера
-        send(new GameData(MessageType.CONNECT, -1, 0, 0, null));
+        send(new GameData(MessageType.CONNECT, -1, 0, 0, null, 1));
     }
 
     public void send(GameData data) {

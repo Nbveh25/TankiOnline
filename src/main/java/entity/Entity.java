@@ -36,4 +36,12 @@ public class Entity {
     public void setDirection(String direction) {
         this.direction = direction;
     }
+
+    public int getSpriteNum() {
+        return spriteNum;
+    }
+
+    public void setSpriteNum(int spriteNum) {
+        this.spriteNum = spriteNum;
+    }
 }

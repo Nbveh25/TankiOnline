@@ -86,7 +86,7 @@ public class Player extends Entity {
 
             spriteCounter++;
             if (spriteCounter > 12) {
-                spriteNum = (spriteNum == 1) ? 2 : 1; // Toggle spriteNum
+                spriteNum = (spriteNum == 1) ? 2 : 1; // Переключение спрайта
                 spriteCounter = 0;
             }
         }

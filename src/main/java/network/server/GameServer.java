@@ -58,12 +58,14 @@ public class GameServer {
         int playerId = nextPlayerId++;
         clients.put(playerId, new ClientInfo(packet.getAddress(), packet.getPort()));
 
-        GameData response = new GameData(MessageType.CONNECT, playerId, 0, 0, null);
+        // Отправляем ответ с ID игрока и начальным спрайтом
+        GameData response = new GameData(MessageType.CONNECT, playerId, 0, 0, null, 1);
         networkHelper.send(response, packet.getAddress(), packet.getPort());
         System.out.println("Player connected with ID: " + playerId);
     }
 
     private void handlePlayerPosition(GameData data) {
+        // Обновляем позицию игрока и отправляем данные всем клиентам
         for (ClientInfo client : clients.values()) {
             if (client.playerId != data.getPlayerId()) {
                 networkHelper.send(data, client.address, client.port);

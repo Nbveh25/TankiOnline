@@ -14,8 +14,8 @@ public class ClientManager {
         gameClient.receive();
     }
 
-    public void sendPlayerData(int playerId, int x, int y, String direction) {
-        gameClient.send(new GameData(MessageType.PLAYER_POSITION, playerId, x, y, direction));
+    public void sendPlayerData(int playerId, int x, int y, String direction, int spriteNum) {
+        gameClient.send(new GameData(MessageType.PLAYER_POSITION, playerId, x, y, direction, spriteNum));
     }
 
     public int getPlayerId() {

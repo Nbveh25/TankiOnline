@@ -32,6 +32,7 @@ public class PlayerManager {
         player.setX(data.getPlayerPosX());
         player.setY(data.getPlayerPosY());
         player.setDirection(data.getDirection());
+        player.setSpriteNum(data.getSpriteNum()); // Обновляем номер спрайта
     }
 
     public void drawPlayers(Graphics2D g2) {
