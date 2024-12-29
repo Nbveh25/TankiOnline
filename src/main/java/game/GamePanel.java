@@ -1,13 +1,12 @@
 package game;
 
 import entity.Player;
-import network.GameClient;
-import network.GameData;
+import network.manager.ClientManager;
+import network.manager.PlayerManager;
+import network.packet.GameData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GamePanel extends JPanel implements Runnable {
     // SCREEN SETTINGS
@@ -20,33 +19,34 @@ public class GamePanel extends JPanel implements Runnable {
     public int screenWidth = tileSize * maxScreenCol; // 768 pixels
     public int screenHeight = tileSize * maxScreenRow; // 576 pixels
 
-    //FPS
+    // FPS
     private final int FPS = 60;
 
-    KeyHandler kh = new KeyHandler(this);
+    private Player player;
+    private KeyHandler keyHandler;
     private Thread gameThread;
-    Player player = new Player(this, kh);
-
-    //Network
-    private Map<Integer, Player> players = new HashMap<>();
-    private GameClient gameClient;
-
+    private PlayerManager playerManager;
+    private ClientManager clientManager;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.BLACK);
         setDoubleBuffered(true);
         this.setFocusable(true);
-        this.addKeyListener(kh);
+
+        keyHandler = new KeyHandler(this);
+
+        this.addKeyListener(keyHandler);
+
+        player = new Player(this, keyHandler);
+        playerManager = new PlayerManager(this, keyHandler);
 
         try {
-            gameClient = new GameClient("localhost", 12345, this::handleGameData);
-            gameClient.receive();
+            clientManager = new ClientManager("localhost", 12345, this::handleGameData);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 
     public void startGameThread() {
         gameThread = new Thread(this);
@@ -74,25 +74,14 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     private void handleGameData(GameData data) {
-        if (!players.containsKey(data.getPlayerId())) {
-            players.put(data.getPlayerId(), new Player(this, null));
-        }
-        Player player = players.get(data.getPlayerId());
-        player.setX(data.getX());
-        player.setY(data.getY());
-        player.setDirection(data.getDirection());
+        playerManager.updatePlayer(data);
     }
 
     public void update() {
         player.update();
         // Отправляем данные о нашем игроке
-        if (gameClient != null && gameClient.getPlayerId() != -1) {
-            gameClient.send(new GameData(
-                    gameClient.getPlayerId(),
-                    player.getX(),
-                    player.getY(),
-                    player.getDirection()
-            ));
+        if (clientManager != null && clientManager.getPlayerId() != -1) {
+            clientManager.sendPlayerData(clientManager.getPlayerId(), player.getX(), player.getY(), player.getDirection());
         }
     }
 
@@ -101,10 +90,7 @@ public class GamePanel extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D) g;
 
         player.draw(g2);
-        // Отрисовка других игроков
-        for (Player p : players.values()) {
-            p.draw(g2);
-        }
+        playerManager.drawPlayers(g2);
 
         g2.dispose();
     }

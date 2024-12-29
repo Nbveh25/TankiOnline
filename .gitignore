@@ -39,3 +39,6 @@ build/
 
 ### My ignore ###
 .idea
+target
+archetype-resources
+META-INF.maven
