@@ -33,10 +33,10 @@ public class Player extends Entity {
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2);
 
         solidArea = new Rectangle();
-        solidArea.x = 4;
-        solidArea.y = 4;
-        solidArea.width = 40;
-        solidArea.height = 40;
+        solidArea.x = 8;
+        solidArea.y = 8;
+        solidArea.width = 32;
+        solidArea.height = 32;
 
         setDefaultValues();
         getPlayerImage();
@@ -66,9 +66,13 @@ public class Player extends Entity {
     }
 
     public void update() {
+        // Обрабатываем движение
         handleMovement();
+
+        // Обновляем пули
         BulletUtil.updateBullets(gp, bullets);
 
+        // Обрабатываем стрельбу
         long currentTime = System.currentTimeMillis();
         if (kh.shootPressed && (currentTime - lastShotTime >= reloadTime)) {
             BulletUtil.shoot(gp, bullets, screenX + muzzleX, screenY + muzzleY, direction);
@@ -82,35 +86,40 @@ public class Player extends Entity {
             }
             lastShotTime = currentTime;
         }
-
-        collisionOn = false;
-
-        gp.collisionChecker.checkTile(this);
     }
 
     private void handleMovement() {
         if (kh.upPressed || kh.downPressed || kh.leftPressed || kh.rightPressed) {
+            // Определяем направление движения
             if (kh.upPressed) {
                 direction = Constants.UP;
-                setStartMuzzlePosition(direction);
-                worldY -= speed;
             } else if (kh.downPressed) {
                 direction = Constants.DOWN;
-                setStartMuzzlePosition(direction);
-                worldY += speed;
             } else if (kh.leftPressed) {
                 direction = Constants.LEFT;
-                setStartMuzzlePosition(direction);
-                worldX -= speed;
             } else if (kh.rightPressed) {
                 direction = Constants.RIGHT;
-                setStartMuzzlePosition(direction);
-                worldX += speed;
             }
 
+            // Проверяем коллизию в выбранном направлении
+            collisionOn = false;
+            gp.collisionChecker.checkTile(this);
+
+            // Двигаемся если нет коллизии
+            if (!collisionOn) {
+                switch (direction) {
+                    case Constants.UP -> worldY -= speed;
+                    case Constants.DOWN -> worldY += speed;
+                    case Constants.LEFT -> worldX -= speed;
+                    case Constants.RIGHT -> worldX += speed;
+                }
+                setStartMuzzlePosition(direction);
+            }
+
+            // Обновляем анимацию в любом случае
             spriteCounter++;
             if (spriteCounter > 12) {
-                spriteNum = (spriteNum == 1) ? 2 : 1; // Переключение спрайта
+                spriteNum = (spriteNum == 1) ? 2 : 1;
                 spriteCounter = 0;
             }
         }

@@ -43,7 +43,7 @@ public class GamePanel extends JPanel implements Runnable {
     public ClientManager clientManager;
     private BulletManager bulletManager;
 
-    TileManager tileManager = new TileManager(this);
+    public TileManager tileManager = new TileManager(this);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
