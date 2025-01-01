@@ -2,7 +2,8 @@ package network.client;
 
 import com.google.gson.Gson;
 import network.helper.NetworkHelper;
-import network.packet.GameData;
+import network.packet.PlayerData;
+import network.packet.BulletData;
 import network.protocol.MessageType;
 
 import java.net.DatagramPacket;
@@ -13,25 +14,22 @@ import java.util.function.Consumer;
 public class GameClient {
     private final DatagramSocket socket;
     private final InetAddress address;
-    private final Consumer<GameData> onDataReceived;
+    private final Consumer<Object> onDataReceived;
     private final NetworkHelper networkHelper;
     private final int port;
     private int playerId = -1;
 
-    public GameClient(String ip, int port, Consumer<GameData> onDataReceived) throws Exception {
+    public GameClient(String ip, int port, Consumer<Object> onDataReceived) throws Exception {
         socket = new DatagramSocket();
         address = InetAddress.getByName(ip);
         this.port = port;
         this.onDataReceived = onDataReceived;
 
-        // Создаем NetworkHelper
         networkHelper = new NetworkHelper(socket);
-
-        // Запрашиваем ID у сервера
-        send(new GameData(MessageType.CONNECT, -1, 0, 0, null, 1));
+        send(new PlayerData(MessageType.CONNECT, -1, 0, 0, null, 1));
     }
 
-    public void send(GameData data) {
+    public void send(Object data) {
         networkHelper.send(data, address, port);
     }
 
@@ -43,13 +41,20 @@ public class GameClient {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
                     String message = new String(packet.getData(), 0, packet.getLength());
+                    Gson gson = new Gson();
 
-                    GameData gameData = new Gson().fromJson(message, GameData.class);
-                    if (gameData.getMessageType() == MessageType.CONNECT) {
-                        playerId = gameData.getPlayerId();
-                        System.out.println("Received player ID: " + playerId);
-                    } else if (gameData.getPlayerId() != playerId) {
-                        onDataReceived.accept(gameData);
+                    // Пробуем определить тип данных
+                    if (message.contains("BULLET_SHOT")) {
+                        BulletData bulletData = gson.fromJson(message, BulletData.class);
+                        onDataReceived.accept(bulletData);
+                    } else {
+                        PlayerData playerData = gson.fromJson(message, PlayerData.class);
+                        if (playerData.getMessageType() == MessageType.CONNECT) {
+                            playerId = playerData.getPlayerId();
+                            System.out.println("Received player ID: " + playerId);
+                        } else if (playerData.getPlayerId() != playerId) {
+                            onDataReceived.accept(playerData);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

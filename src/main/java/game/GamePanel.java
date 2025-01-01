@@ -1,9 +1,11 @@
 package game;
 
 import entity.Player;
+import network.manager.BulletManager;
 import network.manager.ClientManager;
 import network.manager.PlayerManager;
-import network.packet.GameData;
+import network.packet.PlayerData;
+import network.packet.BulletData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,9 +26,11 @@ public class GamePanel extends JPanel implements Runnable {
 
     private Thread gameThread;
     private Player player;
-    private PlayerManager playerManager;
-    private ClientManager clientManager;
     private KeyHandler kh;
+
+    private PlayerManager playerManager;
+    public ClientManager clientManager;
+    private BulletManager bulletManager;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -39,10 +43,15 @@ public class GamePanel extends JPanel implements Runnable {
         this.addKeyListener(kh);
 
         player = new Player(this, kh);
+
         playerManager = new PlayerManager(this, kh);
 
+        bulletManager = new BulletManager(this);
+
         try {
-            clientManager = new ClientManager("localhost", 12345, this::handleGameData);
+            clientManager = new ClientManager("localhost", 12345, 
+                this::handlePlayerData,
+                this::handleBulletData);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,15 +82,21 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
-    private void handleGameData(GameData data) {
-        playerManager.updatePlayer(data);
+    private void handlePlayerData(PlayerData data) {
+        playerManager.update(data);
+    }
+
+    private void handleBulletData(BulletData data) {
+        bulletManager.handleBulletData(data);
     }
 
     public void update() {
         player.update();
-        // Отправляем данные о нашем игроке
+        bulletManager.update();
+        
         if (clientManager != null && clientManager.getPlayerId() != -1) {
-            clientManager.sendPlayerData(clientManager.getPlayerId(), player.getX(), player.getY(), player.getDirection(), player.getSpriteNum());
+            clientManager.sendPlayerData(clientManager.getPlayerId(), 
+                player.getX(), player.getY(), player.getDirection(), player.getSpriteNum());
         }
     }
 
@@ -90,7 +105,8 @@ public class GamePanel extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D) g;
 
         player.draw(g2);
-        playerManager.drawPlayers(g2);
+        playerManager.draw(g2);
+        bulletManager.draw(g2);
 
         g2.dispose();
     }

@@ -4,7 +4,7 @@ import network.protocol.MessageType;
 
 import java.io.Serializable;
 
-public class GameData implements Serializable {
+public class PlayerData implements Serializable {
     private MessageType messageType;
     private int playerId;
     private int playerPosX;
@@ -12,7 +12,7 @@ public class GameData implements Serializable {
     private String direction;
     private int spriteNum; // Номер спрайта для анимации
 
-    public GameData(MessageType messageType, int playerId, int playerPosX, int playerPosY, String direction, int spriteNum) {
+    public PlayerData(MessageType messageType, int playerId, int playerPosX, int playerPosY, String direction, int spriteNum) {
         this.messageType = messageType;
         this.playerId = playerId;
         this.playerPosX = playerPosX;

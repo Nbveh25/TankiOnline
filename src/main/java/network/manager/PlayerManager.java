@@ -3,7 +3,7 @@ package network.manager;
 import entity.Player;
 import game.GamePanel;
 import game.KeyHandler;
-import network.packet.GameData;
+import network.packet.PlayerData;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class PlayerManager {
         players.put(playerId, player);
     }
 
-    public void updatePlayer(GameData data) {
+    public void update(PlayerData data) {
         Player player = players.computeIfAbsent(data.getPlayerId(), id -> new Player(gamePanel, keyHandler));
         player.setX(data.getPlayerPosX());
         player.setY(data.getPlayerPosY());
@@ -35,7 +35,7 @@ public class PlayerManager {
         player.setSpriteNum(data.getSpriteNum()); // Обновляем номер спрайта
     }
 
-    public void drawPlayers(Graphics2D g2) {
+    public void draw(Graphics2D g2) {
         for (Player player : players.values()) {
             player.draw(g2);
         }

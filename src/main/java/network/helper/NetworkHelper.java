@@ -1,7 +1,6 @@
 package network.helper;
 
 import com.google.gson.Gson;
-import network.packet.GameData;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,7 +15,7 @@ public class NetworkHelper {
         this.gson = new Gson();
     }
 
-    public void send(GameData data, InetAddress address, int port) {
+    public void send(Object data, InetAddress address, int port) {
         try {
             String json = gson.toJson(data);
             byte[] buffer = json.getBytes();

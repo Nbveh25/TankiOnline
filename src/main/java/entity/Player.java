@@ -2,7 +2,7 @@ package entity;
 
 import game.GamePanel;
 import game.KeyHandler;
-import util.BulletManager;
+import util.BulletUtil;
 import util.Constants;
 
 import javax.imageio.ImageIO;
@@ -55,12 +55,20 @@ public class Player extends Entity {
 
     public void update() {
         handleMovement();
-        BulletManager.updateBullets(gp, bullets); // Обновление пуль
+        BulletUtil.updateBullets(gp, bullets);
 
         long currentTime = System.currentTimeMillis();
         if (kh.shootPressed && (currentTime - lastShotTime >= reloadTime)) {
-            BulletManager.shoot(gp, bullets, x + muzzleX, y + muzzleY, direction); // Вызываем метод shoot()
-            lastShotTime = currentTime; // Обновляем время последнего выстрела
+            BulletUtil.shoot(gp, bullets, x + muzzleX, y + muzzleY, direction);
+            if (gp.clientManager != null) {
+                gp.clientManager.sendBulletData(
+                    gp.clientManager.getPlayerId(),
+                    x + muzzleX,
+                    y + muzzleY,
+                    direction
+                );
+            }
+            lastShotTime = currentTime;
         }
     }
 
@@ -95,7 +103,7 @@ public class Player extends Entity {
     public void draw(Graphics2D g2) {
         BufferedImage image = getCurrentImage();
         g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null); // Отрисовка игрока
-        BulletManager.drawBullet(g2, bullets); // Отрисовка пуль
+        BulletUtil.drawBullet(g2, bullets); // Отрисовка пуль
     }
 
     private BufferedImage getCurrentImage() {

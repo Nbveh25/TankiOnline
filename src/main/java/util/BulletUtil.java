@@ -6,7 +6,7 @@ import game.GamePanel;
 import java.awt.*;
 import java.util.List;
 
-public class BulletManager {
+public class BulletUtil {
 
     public static void drawBullet(Graphics2D g2, List<Bullet> bullets) {
         for (Bullet bullet : bullets) {
