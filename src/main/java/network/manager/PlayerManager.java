@@ -4,8 +4,10 @@ import entity.Player;
 import game.GamePanel;
 import game.KeyHandler;
 import network.packet.PlayerData;
+import util.Constants;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +39,22 @@ public class PlayerManager {
 
     public void draw(Graphics2D g2) {
         for (Player player : players.values()) {
-            player.draw(g2);
+            // Вычисляем экранные координаты относительно позиции основного игрока
+            int screenX = player.getX() - gamePanel.getPlayer().getX() + gamePanel.getPlayer().getScreenX();
+            int screenY = player.getY() - gamePanel.getPlayer().getY() + gamePanel.getPlayer().getScreenY();
+            
+            // Получаем текущий спрайт
+            BufferedImage image = switch (player.getDirection()) {
+                case Constants.UP -> player.getSpriteNum() == 1 ? player.up1 : player.up2;
+                case Constants.DOWN -> player.getSpriteNum() == 1 ? player.down1 : player.down2;
+                case Constants.LEFT -> player.getSpriteNum() == 1 ? player.left1 : player.left2;
+                case Constants.RIGHT -> player.getSpriteNum() == 1 ? player.right1 : player.right2;
+                default -> null;
+            };
+
+            if (image != null) {
+                g2.drawImage(image, screenX, screenY, gamePanel.tileSize, gamePanel.tileSize, null);
+            }
         }
     }
 }

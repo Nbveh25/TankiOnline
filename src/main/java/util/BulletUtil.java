@@ -20,7 +20,7 @@ public class BulletUtil {
             bullet.update();
 
             // Удаление снарядов, которые вышли за пределы экрана
-            if (bullet.x < 0 || bullet.x > gp.screenWidth || bullet.y < 0 || bullet.y > gp.screenHeight) {
+            if (bullet.getX() < 0 || bullet.getX() > gp.screenWidth || bullet.getY() < 0 || bullet.getY() > gp.screenHeight) {
                 bullets.remove(i);
                 i--;
             }

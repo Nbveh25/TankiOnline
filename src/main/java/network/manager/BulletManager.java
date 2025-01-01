@@ -35,8 +35,8 @@ public class BulletManager {
     }
 
     private boolean isOutOfBounds(Bullet bullet) {
-        return bullet.x < 0 || bullet.x > gp.screenWidth ||
-               bullet.y < 0 || bullet.y > gp.screenHeight;
+        return bullet.getX() < 0 || bullet.getX() > gp.screenWidth ||
+               bullet.getY() < 0 || bullet.getY() > gp.screenHeight;
     }
 
     public void handleBulletData(BulletData data) {
@@ -48,8 +48,12 @@ public class BulletManager {
 
     public void draw(Graphics2D g2) {
         playerBullets.forEach((playerId, bullets) -> {
-            System.out.println("Drawing " + bullets.size() + " bullets for player " + playerId);
-            bullets.forEach(bullet -> bullet.draw(g2));
+            bullets.forEach(bullet -> {
+                int screenX = bullet.getX() - gp.getPlayer().getX() + gp.getPlayer().getScreenX();
+                int screenY = bullet.getY() - gp.getPlayer().getY() + gp.getPlayer().getScreenY();
+                
+                g2.drawImage(bullet.image, screenX, screenY, gp.tileSize/3, gp.tileSize/3, null);
+            });
         });
     }
 }

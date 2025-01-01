@@ -6,6 +6,8 @@ import network.manager.ClientManager;
 import network.manager.PlayerManager;
 import network.packet.PlayerData;
 import network.packet.BulletData;
+import tile.TileManager;
+import util.CollisionChecker;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +23,13 @@ public class GamePanel extends JPanel implements Runnable {
     public int screenWidth = tileSize * maxScreenCol; // 768 pixels
     public int screenHeight = tileSize * maxScreenRow; // 576 pixels
 
+    // WORLD SETTINGS
+    public final int maxWorldCol = 50;
+    public final int maxWorldRow = 50;
+    public final int worldWidth = tileSize * maxWorldCol;
+    public final int worldHeight = tileSize * maxWorldRow;
+
+
     // FPS
     private final int FPS = 60;
 
@@ -28,9 +37,13 @@ public class GamePanel extends JPanel implements Runnable {
     private Player player;
     private KeyHandler kh;
 
+    public CollisionChecker collisionChecker = new CollisionChecker(this);
+
     private PlayerManager playerManager;
     public ClientManager clientManager;
     private BulletManager bulletManager;
+
+    TileManager tileManager = new TileManager(this);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -104,10 +117,15 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
+        tileManager.draw(g2);
         player.draw(g2);
         playerManager.draw(g2);
         bulletManager.draw(g2);
 
         g2.dispose();
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 }

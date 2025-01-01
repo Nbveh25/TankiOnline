@@ -18,6 +18,9 @@ public class Player extends Entity {
     private KeyHandler kh;
     private List<Bullet> bullets;
 
+    private final int screenX;
+    private final int screenY;
+
     private long reloadTime = 500; // Время перезарядки в миллисекундах
     private long lastShotTime = 0;
 
@@ -26,13 +29,22 @@ public class Player extends Entity {
         this.kh = kh;
         bullets = new ArrayList<>();
 
+        screenX = gp.screenWidth / 2 - (gp.tileSize / 2);
+        screenY = gp.screenHeight / 2 - (gp.tileSize / 2);
+
+        solidArea = new Rectangle();
+        solidArea.x = 4;
+        solidArea.y = 4;
+        solidArea.width = 40;
+        solidArea.height = 40;
+
         setDefaultValues();
         getPlayerImage();
     }
 
     public void setDefaultValues() {
-        x = 100;
-        y = 100;
+        worldX = 100;
+        worldY = 100;
         speed = 1;
         direction = "down";
         setStartMuzzlePosition(direction);
@@ -59,17 +71,21 @@ public class Player extends Entity {
 
         long currentTime = System.currentTimeMillis();
         if (kh.shootPressed && (currentTime - lastShotTime >= reloadTime)) {
-            BulletUtil.shoot(gp, bullets, x + muzzleX, y + muzzleY, direction);
+            BulletUtil.shoot(gp, bullets, screenX + muzzleX, screenY + muzzleY, direction);
             if (gp.clientManager != null) {
                 gp.clientManager.sendBulletData(
                     gp.clientManager.getPlayerId(),
-                    x + muzzleX,
-                    y + muzzleY,
+                    worldX + muzzleX,
+                    worldY + muzzleY,
                     direction
                 );
             }
             lastShotTime = currentTime;
         }
+
+        collisionOn = false;
+
+        gp.collisionChecker.checkTile(this);
     }
 
     private void handleMovement() {
@@ -77,19 +93,19 @@ public class Player extends Entity {
             if (kh.upPressed) {
                 direction = Constants.UP;
                 setStartMuzzlePosition(direction);
-                y -= speed;
+                worldY -= speed;
             } else if (kh.downPressed) {
                 direction = Constants.DOWN;
                 setStartMuzzlePosition(direction);
-                y += speed;
+                worldY += speed;
             } else if (kh.leftPressed) {
                 direction = Constants.LEFT;
                 setStartMuzzlePosition(direction);
-                x -= speed;
+                worldX -= speed;
             } else if (kh.rightPressed) {
                 direction = Constants.RIGHT;
                 setStartMuzzlePosition(direction);
-                x += speed;
+                worldX += speed;
             }
 
             spriteCounter++;
@@ -102,7 +118,7 @@ public class Player extends Entity {
 
     public void draw(Graphics2D g2) {
         BufferedImage image = getCurrentImage();
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null); // Отрисовка игрока
+        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null); // Отрисовка игрока
         BulletUtil.drawBullet(g2, bullets); // Отрисовка пуль
     }
 
@@ -180,5 +196,13 @@ public class Player extends Entity {
 
     public void setLastShotTime(long lastShotTime) {
         this.lastShotTime = lastShotTime;
+    }
+
+    public int getScreenX() {
+        return screenX;
+    }
+
+    public int getScreenY() {
+        return screenY;
     }
 }

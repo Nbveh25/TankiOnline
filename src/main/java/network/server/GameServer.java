@@ -30,7 +30,7 @@ public class GameServer {
 
                 String message = new String(packet.getData(), 0, packet.getLength());
 
-                // Определяем тип сообщения
+                // Determine message type
                 if (message.contains("BULLET_SHOT")) {
                     BulletData bulletData = gson.fromJson(message, BulletData.class);
                     handleBulletData(bulletData, packet);
@@ -46,14 +46,34 @@ public class GameServer {
     }
 
     private void handleBulletData(BulletData bulletData, DatagramPacket packet) {
-        // Отправляем данные о пуле всем клиентам
-        String json = gson.toJson(bulletData);
-        byte[] data = json.getBytes();
+        // Send bullet data to all clients except the sender
+        sendToAllClients(bulletData, bulletData.getPlayerId());
+    }
+
+    private void handlePlayerData(PlayerData playerData, DatagramPacket packet) {
+        if (playerData.getMessageType() == MessageType.CONNECT) {
+            // Handle new connection
+            int clientId = nextClientId++;
+            clients.put(clientId, new ClientInfo(packet.getAddress(), packet.getPort()));
+
+            // Send ID to the client
+            PlayerData response = new PlayerData(MessageType.CONNECT, clientId, 0, 0, null, 1);
+            sendToClient(response, packet.getAddress(), packet.getPort());
+        } else {
+            // Forward position updates to all other clients
+            sendToAllClients(playerData, playerData.getPlayerId());
+        }
+    }
+
+    private void sendToAllClients(Object data, int senderId) {
+        String json = gson.toJson(data);
+        byte[] messageBytes = json.getBytes();
+
         clients.forEach((id, client) -> {
-            if (id != bulletData.getPlayerId()) {
+            if (id != senderId) {
                 try {
                     DatagramPacket outPacket = new DatagramPacket(
-                        data, data.length, client.getAddress(), client.getPort()
+                            messageBytes, messageBytes.length, client.getAddress(), client.getPort()
                     );
                     socket.send(outPacket);
                 } catch (Exception e) {
@@ -61,34 +81,6 @@ public class GameServer {
                 }
             }
         });
-    }
-
-    private void handlePlayerData(PlayerData playerData, DatagramPacket packet) {
-        if (playerData.getMessageType() == MessageType.CONNECT) {
-            // Обработка нового подключения
-            int clientId = nextClientId++;
-            clients.put(clientId, new ClientInfo(packet.getAddress(), packet.getPort()));
-            
-            // Отправляем ID клиенту
-            PlayerData response = new PlayerData(MessageType.CONNECT, clientId, 0, 0, null, 1);
-            sendToClient(response, packet.getAddress(), packet.getPort());
-        } else {
-            // Пересылаем обновления позиции всем остальным клиентам
-            String json = gson.toJson(playerData);
-            byte[] data = json.getBytes();
-            clients.forEach((id, client) -> {
-                if (id != playerData.getPlayerId()) {
-                    try {
-                        DatagramPacket outPacket = new DatagramPacket(
-                            data, data.length, client.getAddress(), client.getPort()
-                        );
-                        socket.send(outPacket);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
     }
 
     private void sendToClient(PlayerData data, java.net.InetAddress address, int port) {
