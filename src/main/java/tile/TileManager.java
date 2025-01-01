@@ -90,9 +90,14 @@ public class TileManager {
 
             int tileNum = mapTileNum[worldCol][worldRow];
 
-            g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
-            worldCol++;
+            if (    worldX + gp.tileSize > gp.getPlayer().getX() - gp.getPlayer().getScreenX() &&
+                    worldX - gp.tileSize < gp.getPlayer().getX() + gp.getPlayer().getScreenX() &&
+                    worldY + gp.tileSize > gp.getPlayer().getY() - gp.getPlayer().getScreenY() &&
+                    worldY - gp.tileSize < gp.getPlayer().getY() + gp.getPlayer().getScreenY()) {
+                g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+            }
 
+            worldCol++;
 
             if (worldCol == gp.maxScreenCol) {
                 worldCol = 0;
